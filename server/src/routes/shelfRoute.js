@@ -5,10 +5,10 @@ import {
   getShelves,
 } from "../controllers/shelfController.js";
 
-const router = express.Router();
+const shelfRouter = express.Router();
 
-router.get("/:id", getShelves);
-router.post("/", createShelf);
-router.delete("/:id", deleteShelf);
+shelfRouter.get("/:id", getShelves);
+shelfRouter.post("/", createShelf);
+shelfRouter.delete("/:id", deleteShelf);
 
-export default router;
+export default shelfRouter;

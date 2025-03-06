@@ -2,7 +2,8 @@ import Link from "../database/schemas/linkSchema.js";
 
 // Create a new link
 export const addLink = async (req, res) => {
-  const { shelfID, url, position } = req.body;
+  const { shelfID, description, url, position, color } = req.body;
+  let { name } = req.body;
 
   if (!shelfID || !url || !Number.isInteger(position)) {
     return res.status(400).json({ message: "Must specify all fields" });
@@ -14,8 +15,19 @@ export const addLink = async (req, res) => {
       .json({ message: "Position must be an integer 0 or greater" });
   }
 
+  if (!name) {
+    name = url;
+  }
+
   try {
-    const newLink = new Link({ shelfID, url, position });
+    const newLink = new Link({
+      shelfID,
+      name,
+      description,
+      url,
+      position,
+      color,
+    });
     await newLink.save();
     res.status(200).json({ newLink });
   } catch (error) {

@@ -7,8 +7,11 @@ const linkSchema = new mongoose.Schema(
       ref: "Shelf",
       required: true,
     },
+    name: { type: String, required: true },
+    description: { type: String, default: "My saved link." },
     url: { type: String, required: true },
     position: { type: Number, required: true },
+    color: { type: String, default: "blue" },
   },
   { timestamps: true }
 );

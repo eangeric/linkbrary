@@ -5,10 +5,10 @@ import {
   updateLink,
 } from "../controllers/linkController.js";
 
-const router = express.Router();
+const linkRouter = express.Router();
 
-router.post("/", addLink);
-router.put("/:id", updateLink);
-router.delete("/:id", deleteLink);
+linkRouter.post("/", addLink);
+linkRouter.put("/:id", updateLink);
+linkRouter.delete("/:id", deleteLink);
 
-export default router;
+export default linkRouter;
