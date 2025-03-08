@@ -26,7 +26,7 @@ await connectDB();
 // use express json parsing
 app.use(express.json());
 // cors to allow connection from frontend
-app.use(cors({ origin: process.env.FRONTEND }));
+app.use(cors({ origin: process.env.FRONTEND, credentials: true }));
 // morgan to log api requests
 app.use(morgan("dev"));
 // express session to handle session cookies
@@ -37,10 +37,11 @@ app.use(
     saveUninitialized: false,
     store: MongoStore.create({
       mongoUrl: process.env.MONGO_URI,
-      ttl: 1000 * 60 * 60,
+      ttl: 1000 * 60 * 60 * 24 * 7,
+      stringify: false,
     }),
     cookie: {
-      maxAge: 1000 * 60 * 60,
+      maxAge: 1000 * 60 * 60 * 24 * 7,
     },
   })
 );

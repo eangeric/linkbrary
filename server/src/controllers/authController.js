@@ -1,8 +1,7 @@
 import User from "../database/schemas/userSchema.js";
 
-export const signinUser = async (req, res) => {
+export const signUpUser = async (req, res) => {
   const { email, password } = req.body;
-
   if (!email || !password) {
     return res.status(400).json({ message: "Must provide all fields" });
   }
@@ -20,6 +19,7 @@ export const signinUser = async (req, res) => {
     }
 
     req.session.userId = user._id;
+    req.session.email = user.email;
 
     return res.status(200).json({ message: "Successfully signed up user" });
   } catch (error) {
@@ -42,6 +42,7 @@ export const loginUser = async (req, res) => {
     }
 
     req.session.userId = user._id;
+    req.session.email = user.email;
 
     return res.status(200).json({ message: "Successfully logged in user" });
   } catch (error) {
