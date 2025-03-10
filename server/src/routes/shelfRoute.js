@@ -7,7 +7,7 @@ import {
 
 const shelfRouter = express.Router();
 
-shelfRouter.get("/:id", getShelves);
+shelfRouter.get("/", getShelves);
 shelfRouter.post("/", createShelf);
 shelfRouter.delete("/:id", deleteShelf);
 

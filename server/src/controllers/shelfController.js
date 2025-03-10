@@ -2,13 +2,13 @@ import Shelf from "../database/schemas/shelfSchema.js";
 
 // Get all shelves
 export const getShelves = async (req, res) => {
-  const { id } = req.params;
+  const user = req.session.userId;
 
   try {
-    const shelves = await Shelf.find({ user: id });
+    const shelves = await Shelf.find({ user });
 
     if (!shelves.length) {
-      return res.status(404).json({ message: "No shelves found" });
+      return res.status(200).json({ message: "No shelves found", shelves: {} });
     }
 
     const shelvesWithLinks = await Promise.all(
@@ -27,7 +27,8 @@ export const getShelves = async (req, res) => {
 
 // Create a new shelf
 export const createShelf = async (req, res) => {
-  const { user, name } = req.body;
+  const { name } = req.body;
+  const user = req.session.userId;
 
   if (!user || !name) {
     return res.status(400).json({ message: "Must specify all fields" });

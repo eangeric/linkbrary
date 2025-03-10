@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 
 const linkSchema = new mongoose.Schema(
   {
-    shelfID: {
+    shelf: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Shelf",
       required: true,
@@ -11,7 +11,6 @@ const linkSchema = new mongoose.Schema(
     description: { type: String, default: "My saved link." },
     url: { type: String, required: true },
     position: { type: Number, required: true },
-    color: { type: String, default: "blue" },
   },
   { timestamps: true }
 );
