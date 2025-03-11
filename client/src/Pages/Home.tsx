@@ -1,41 +1,71 @@
+import { useQuery } from "@tanstack/react-query";
 import Navbar from "../Components/Navbar";
 import Collapse from "../Components/Collapse";
-import { useEffect, useState } from "react";
+import Links from "../Components/Links";
+import { useState } from "react";
 
 type Shelf = {
   _id: string;
   name: string;
+  links: [];
 };
 
+type ShelvesResponse = { shelves: Shelf[] };
+
 export default function Home() {
-  const [shelves, setShelves] = useState<Shelf[]>([]);
-  useEffect(() => {
-    const getShelves = async () => {
-      try {
-        const response = await fetch("http://localhost:4000/api/shelf/", {
-          credentials: "include",
-        });
+  const [expandedIds, setExpandedIds] = useState<string[]>([]);
+  const getShelves = async (): Promise<ShelvesResponse> => {
+    try {
+      const response = await fetch("http://localhost:4000/api/shelf/", {
+        credentials: "include",
+      });
 
-        if (!response.ok) {
-          throw new Error("Failed to fetch shelves");
-        }
-
-        const data = await response.json();
-        setShelves(data.shelves);
-      } catch (error) {
-        console.error("Error fetching shelves:", error);
+      if (!response.ok) {
+        throw new Error("Failed to fetch shelves");
       }
-    };
 
-    getShelves();
-  }, []);
+      return response.json();
+    } catch (error) {
+      throw new Error("Error: " + error);
+    }
+  };
+
+  const { data, isLoading, error } = useQuery({
+    queryKey: ["shelves"],
+    queryFn: getShelves,
+  });
+
+  const toggleExpand = (id: string) => {
+    setExpandedIds((prev) =>
+      // If in expandedIds remove it (close)
+      // Else add to expandedIds (collapse)
+      prev.includes(id)
+        ? prev.filter((shelfId) => shelfId !== id)
+        : [...prev, id]
+    );
+  };
 
   return (
     <div>
       <Navbar />
-      {shelves?.map((shelf) => {
-        return <Collapse key={shelf._id} name={shelf.name} />;
-      })}
+      <div className="flex flex-col items-center mt-4 gap-2">
+        {isLoading && <p>Loading shelves</p>}
+        {error && <p>{error.message}</p>}
+        {!isLoading &&
+          data?.shelves.map((shelf) => {
+            return (
+              <Collapse
+                key={shelf._id}
+                id={shelf._id}
+                name={shelf.name}
+                isExpanded={expandedIds.includes(shelf._id)}
+                toggleExpand={() => toggleExpand(shelf._id)}
+              >
+                <Links links={shelf.links} />
+              </Collapse>
+            );
+          })}
+      </div>
     </div>
   );
 }

@@ -8,7 +8,7 @@ export const getShelves = async (req, res) => {
     const shelves = await Shelf.find({ user });
 
     if (!shelves.length) {
-      return res.status(200).json({ message: "No shelves found", shelves: {} });
+      return res.status(200).json({ message: "No shelves found", shelves: [] });
     }
 
     const shelvesWithLinks = await Promise.all(

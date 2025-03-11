@@ -1,41 +1,129 @@
-import { SlArrowDown } from "react-icons/sl";
-import { FiPlus } from "react-icons/fi";
-import { useState } from "react";
+import { SlArrowDown, SlPlus } from "react-icons/sl";
+import { SlTrash } from "react-icons/sl";
+import { SlNote } from "react-icons/sl";
+import { useState, useRef, useEffect } from "react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 
-type CollapseProps = {
+type Shelf = {
+  _id: string;
   name: string;
+  links: [];
 };
 
-export default function Collapse({ name }: CollapseProps) {
-  const [collapsed, setCollapsed] = useState(false);
+type CollapseProps = {
+  id: string;
+  name: string;
+  isExpanded: boolean;
+  toggleExpand: () => void;
+  children?: React.ReactNode;
+};
+
+export default function Collapse({
+  id,
+  name,
+  isExpanded,
+  toggleExpand,
+  children,
+}: CollapseProps) {
+  const [contentHeight, setContentHeight] = useState(0);
+  const collapseRef = useRef<HTMLDivElement>(null);
+  const queryClient = useQueryClient();
+
+  const deleteShelf = async (shelfId: string) => {
+    try {
+      const response = await fetch(
+        `http://localhost:4000/api/shelf/${shelfId}`,
+        {
+          method: "DELETE",
+          credentials: "include",
+        }
+      );
+
+      if (!response.ok) throw new Error("Failed to delete shelf");
+
+      return response.json();
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const { mutate } = useMutation({
+    mutationFn: deleteShelf,
+    onMutate: async (shelfId) => {
+      await queryClient.cancelQueries({ queryKey: ["shelves"] });
+
+      const previousShelves = queryClient.getQueryData(["shelves"]);
+
+      queryClient.setQueryData(
+        ["shelves"],
+        (oldData: { shelves: Shelf[] }) => ({
+          shelves: oldData.shelves.filter((shelf) => shelf._id !== shelfId),
+        })
+      );
+
+      return { previousShelves };
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ["shelves"] });
+    },
+    onError: (_error, _shelfId, context) => {
+      if (context?.previousShelves) {
+        queryClient.setQueryData(["shelves"], context.previousShelves);
+      }
+    },
+  });
+
+  useEffect(() => {
+    if (collapseRef.current) {
+      setContentHeight(collapseRef.current.clientHeight);
+    }
+  }, [isExpanded, children]);
+
   return (
     <div>
-      <div className="flex flex-col items-center">
-        <div
-          className={`relative bg-black w-[350px] h-[50px] rounded-t-xl flex justify-center items-center cursor-pointer transition-all ease-in-out duration-300 ${
-            collapsed ? "rounded-t-xl" : "delay-150 rounded-xl"
+      <div
+        onClick={toggleExpand}
+        className={`relative w-[325px] bg-black flex justify-center items-center transition-all ease-in-out duration-300 p-2 text-lg font-bold cursor-pointer ${
+          isExpanded ? "rounded-t-xl" : "delay-150"
+        }`}
+      >
+        {name}
+        <SlArrowDown
+          className={`absolute right-0 mr-[11px] transition-all delay-150 duration-300 ease-in-out ${
+            isExpanded ? "rotate-180" : ""
           }`}
-          onClick={() => {
-            setCollapsed((prev) => !prev);
-          }}
-        >
-          <p className="font-bold select-none">{name}</p>
-          <SlArrowDown
-            className={`absolute right-5 transition-all ease-in-out duration-300 ${
-              collapsed ? "rotate-180" : ""
+        />
+        <div className="flex gap-[11px] absolute left-0 ml-[11px] ">
+          <SlTrash
+            onClick={(event) => {
+              event.stopPropagation();
+              mutate(id);
+            }}
+            className={`transition-all duration-300 ease-in-out hover:text-red-600 ${
+              isExpanded ? "delay-150 opacity-100" : "opacity-0"
+            }`}
+          />
+          <SlNote
+            className={`transition-all duration-300 ease-in-out hover:text-green-600 ${
+              isExpanded ? "delay-150 opacity-100" : "opacity-0"
+            }`}
+          />
+          <SlPlus
+            className={`transition-all duration-300 ease-in-out hover:text-blue-600 ${
+              isExpanded ? "delay-150 opacity-100" : "opacity-0"
             }`}
           />
         </div>
-        <div
-          className={`text-black bg-white w-[350px] rounded-b-xl flex flex-col justify-center items-center transition-all ease-in-out duration-300 select-none ${
-            collapsed ? "delay-150 h-[50px] min-h-[50px]" : "h-0 opacity-0"
-          }`}
-        >
-          <p className="w-full h-[50px] flex justify-between items-center p-2">
-            Click the plus to add a new link.
-            <FiPlus className="size-6 cursor-pointer" />
-          </p>
-        </div>
+      </div>
+      <div
+        className={`w-[325px] transition-all ease-in-out duration-300 overflow-hidden bg-white text-black text-lg rounded-b-xl ${
+          isExpanded ? "delay-150 p-2" : "opacity-0 p-0"
+        }`}
+        style={{
+          height: isExpanded ? contentHeight + 16 + "px" : 0,
+        }}
+      >
+        <div ref={collapseRef}>{children}</div>
       </div>
     </div>
   );
