@@ -2,6 +2,7 @@ import { useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import Dialog from "./Dialog";
 import ShelfForm from "./ShelfForm";
+import { SlMenu } from "react-icons/sl";
 
 export default function Navbar() {
   const dialogRef = useRef<HTMLDialogElement>(null);
@@ -18,29 +19,33 @@ export default function Navbar() {
 
   return (
     <div>
+      {/* Dialog form */}
       <Dialog dialogRef={dialogRef}>
         <ShelfForm dialogRef={dialogRef} />
       </Dialog>
-      <div className="navbar flex justify-end bg-neutral text-neutral-content">
-        <div className="navbar-start">
-          <p className="text-lg font-bold px-4 py-2 cursor-pointer select-none">
-            Linkbrary
-          </p>
+      {/* Navbar */}
+      <nav className="flex justify-between items-center bg-black py-4 px-8 drop-shadow-xl">
+        <div>
+          <a>Linkbrary</a>
         </div>
-        <div className="navbar-center">
-          <p
-            className="btn btn-ghost text-lg"
+        <div className="hidden sm:flex items-center font-semibold text-base">
+          <a
+            className="transition-color duration-300 ease-in-out cursor-pointer hover:bg-blue-500 hover:rounded-md px-6 py-2"
             onClick={() => dialogRef.current?.showModal()}
           >
-            New Shelf
-          </p>
-        </div>
-        <div className="navbar-end">
-          <a className="btn btn-ghost text-lg" onClick={logoutHandler}>
+            Add Shelf
+          </a>
+          <a
+            className="transition-color duration-300 ease-in-out cursor-pointer hover:bg-blue-500 hover:rounded-md px-6 py-2"
+            onClick={logoutHandler}
+          >
             Log out
           </a>
         </div>
-      </div>
+        <div className="sm:hidden ">
+          <SlMenu className="size-6" />
+        </div>
+      </nav>
     </div>
   );
 }

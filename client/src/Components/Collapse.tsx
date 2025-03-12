@@ -3,6 +3,8 @@ import { SlTrash } from "react-icons/sl";
 import { SlNote } from "react-icons/sl";
 import { useState, useRef, useEffect } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import Dialog from "./Dialog";
+import ShelfForm from "./ShelfForm";
 
 type Shelf = {
   _id: string;
@@ -28,6 +30,7 @@ export default function Collapse({
   const [contentHeight, setContentHeight] = useState(0);
   const collapseRef = useRef<HTMLDivElement>(null);
   const queryClient = useQueryClient();
+  const dialogRef = useRef<HTMLDialogElement>(null);
 
   const deleteShelf = async (shelfId: string) => {
     try {
@@ -81,6 +84,10 @@ export default function Collapse({
 
   return (
     <div>
+      {/* Dialog form */}
+      <Dialog dialogRef={dialogRef}>
+        <ShelfForm dialogRef={dialogRef} shelfId={id} update={true} />
+      </Dialog>
       <div
         onClick={toggleExpand}
         className={`relative w-[325px] bg-black flex justify-center items-center transition-all ease-in-out duration-300 p-2 text-lg font-bold cursor-pointer ${
@@ -104,6 +111,10 @@ export default function Collapse({
             }`}
           />
           <SlNote
+            onClick={(event) => {
+              event.stopPropagation();
+              dialogRef.current?.showModal();
+            }}
             className={`transition-all duration-300 ease-in-out hover:text-green-600 ${
               isExpanded ? "delay-150 opacity-100" : "opacity-0"
             }`}

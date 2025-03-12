@@ -48,23 +48,25 @@ export default function Home() {
   return (
     <div>
       <Navbar />
-      <div className="flex flex-col items-center mt-4 gap-2">
-        {isLoading && <p>Loading shelves</p>}
-        {error && <p>{error.message}</p>}
-        {!isLoading &&
-          data?.shelves.map((shelf) => {
-            return (
-              <Collapse
-                key={shelf._id}
-                id={shelf._id}
-                name={shelf.name}
-                isExpanded={expandedIds.includes(shelf._id)}
-                toggleExpand={() => toggleExpand(shelf._id)}
-              >
-                <Links links={shelf.links} />
-              </Collapse>
-            );
-          })}
+      <div className="flex justify-center">
+        <div className="mt-4 gap-4 grid grid-auto-rows-auto grid-cols-1 md:grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          {isLoading && <p>Loading shelves</p>}
+          {error && <p>{error.message}</p>}
+          {!isLoading &&
+            data?.shelves.map((shelf) => {
+              return (
+                <Collapse
+                  key={shelf._id}
+                  id={shelf._id}
+                  name={shelf.name}
+                  isExpanded={expandedIds.includes(shelf._id)}
+                  toggleExpand={() => toggleExpand(shelf._id)}
+                >
+                  <Links links={shelf.links} />
+                </Collapse>
+              );
+            })}
+        </div>
       </div>
     </div>
   );

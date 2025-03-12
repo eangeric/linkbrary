@@ -43,6 +43,28 @@ export const createShelf = async (req, res) => {
   }
 };
 
+// Update a shelf
+export const updateShelf = async (req, res) => {
+  const { id } = req.params;
+  const { name } = req.body;
+
+  if (!id || !name) {
+    return res.status(400).json({ message: "Must specify all fields" });
+  }
+
+  try {
+    const updatedShelf = await Shelf.findByIdAndUpdate(id, { name });
+
+    if (!updatedShelf) {
+      return res.status(404).json({ message: "Shelf not found" });
+    }
+
+    res.status(200).json({ updatedShelf });
+  } catch (error) {
+    res.status(500).json({ message: "Error updating shelf" });
+  }
+};
+
 // Delete a shelf
 export const deleteShelf = async (req, res) => {
   const { id } = req.params;
