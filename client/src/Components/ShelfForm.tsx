@@ -148,7 +148,9 @@ export default function ShelfForm({ dialogRef, shelfId, update }: ShelfProps) {
   return (
     <form onSubmit={submitHandler} autoComplete="off">
       <fieldset className="fieldset w-xs bg-black border border-base-300 p-4 rounded-box">
-        <legend className="fieldset-legend">Add Shelf</legend>
+        <legend className="fieldset-legend">
+          {update ? "Update Shelf" : "Add Shelf"}
+        </legend>
         <label className="fieldset-label" htmlFor="name">
           Name
         </label>
@@ -171,7 +173,7 @@ export default function ShelfForm({ dialogRef, shelfId, update }: ShelfProps) {
             Cancel
           </button>
           <button type="submit" className="flex-1 btn bg-green-800 mt-4">
-            Add
+            {update ? "Update" : "Add"}
           </button>
         </div>
       </fieldset>

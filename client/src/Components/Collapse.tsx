@@ -2,15 +2,9 @@ import { SlArrowDown, SlPlus } from "react-icons/sl";
 import { SlTrash } from "react-icons/sl";
 import { SlNote } from "react-icons/sl";
 import { useState, useRef, useEffect } from "react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
 import Dialog from "./Dialog";
 import ShelfForm from "./ShelfForm";
-
-type Shelf = {
-  _id: string;
-  name: string;
-  links: [];
-};
+import DeleteConfirmation from "./DeleteConfirmation";
 
 type CollapseProps = {
   id: string;
@@ -29,52 +23,8 @@ export default function Collapse({
 }: CollapseProps) {
   const [contentHeight, setContentHeight] = useState(0);
   const collapseRef = useRef<HTMLDivElement>(null);
-  const queryClient = useQueryClient();
-  const dialogRef = useRef<HTMLDialogElement>(null);
-
-  const deleteShelf = async (shelfId: string) => {
-    try {
-      const response = await fetch(
-        `http://localhost:4000/api/shelf/${shelfId}`,
-        {
-          method: "DELETE",
-          credentials: "include",
-        }
-      );
-
-      if (!response.ok) throw new Error("Failed to delete shelf");
-
-      return response.json();
-    } catch (error) {
-      console.log(error);
-    }
-  };
-
-  const { mutate } = useMutation({
-    mutationFn: deleteShelf,
-    onMutate: async (shelfId) => {
-      await queryClient.cancelQueries({ queryKey: ["shelves"] });
-
-      const previousShelves = queryClient.getQueryData(["shelves"]);
-
-      queryClient.setQueryData(
-        ["shelves"],
-        (oldData: { shelves: Shelf[] }) => ({
-          shelves: oldData.shelves.filter((shelf) => shelf._id !== shelfId),
-        })
-      );
-
-      return { previousShelves };
-    },
-    onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: ["shelves"] });
-    },
-    onError: (_error, _shelfId, context) => {
-      if (context?.previousShelves) {
-        queryClient.setQueryData(["shelves"], context.previousShelves);
-      }
-    },
-  });
+  const dialogRefEdit = useRef<HTMLDialogElement>(null);
+  const dialogRefDelete = useRef<HTMLDialogElement>(null);
 
   useEffect(() => {
     if (collapseRef.current) {
@@ -84,9 +34,13 @@ export default function Collapse({
 
   return (
     <div>
-      {/* Dialog form */}
-      <Dialog dialogRef={dialogRef}>
-        <ShelfForm dialogRef={dialogRef} shelfId={id} update={true} />
+      {/* Dialog edit form */}
+      <Dialog dialogRef={dialogRefEdit}>
+        <ShelfForm dialogRef={dialogRefEdit} shelfId={id} update={true} />
+      </Dialog>
+      {/* Dialog delete form */}
+      <Dialog dialogRef={dialogRefDelete}>
+        <DeleteConfirmation dialogRef={dialogRefDelete} name={name} id={id} />
       </Dialog>
       <div
         onClick={toggleExpand}
@@ -94,7 +48,15 @@ export default function Collapse({
           isExpanded ? "rounded-t-xl" : "delay-150"
         }`}
       >
-        {name}
+        <p
+          className={`truncate transition-all ease-in-out ${
+            isExpanded
+              ? "max-w-[13ch] delay-50 duration-400"
+              : "max-w-[26ch] duration-600"
+          }`}
+        >
+          {name}
+        </p>
         <SlArrowDown
           className={`absolute right-0 mr-[11px] transition-all delay-150 duration-300 ease-in-out ${
             isExpanded ? "rotate-180" : ""
@@ -104,24 +66,28 @@ export default function Collapse({
           <SlTrash
             onClick={(event) => {
               event.stopPropagation();
-              mutate(id);
+              dialogRefDelete.current?.showModal();
+              // mutate(id);
             }}
             className={`transition-all duration-300 ease-in-out hover:text-red-600 ${
-              isExpanded ? "delay-150 opacity-100" : "opacity-0"
+              isExpanded ? "delay-150 opacity-100" : "opacity-0 invisible"
             }`}
           />
           <SlNote
             onClick={(event) => {
               event.stopPropagation();
-              dialogRef.current?.showModal();
+              dialogRefEdit.current?.showModal();
             }}
             className={`transition-all duration-300 ease-in-out hover:text-green-600 ${
-              isExpanded ? "delay-150 opacity-100" : "opacity-0"
+              isExpanded ? "delay-150 opacity-100" : "opacity-0 invisible"
             }`}
           />
           <SlPlus
+            onClick={(event) => {
+              event.stopPropagation();
+            }}
             className={`transition-all duration-300 ease-in-out hover:text-blue-600 ${
-              isExpanded ? "delay-150 opacity-100" : "opacity-0"
+              isExpanded ? "delay-150 opacity-100" : "opacity-0 invisible"
             }`}
           />
         </div>
